@@ -2683,6 +2683,59 @@ sub parse_version {
 }
 
 
+=item parse_authority
+
+    my $authority = MM->parse_authority($file);
+
+Parse a $file and return what $AUTHORITY is set to by the first assignment.
+It will return the string "undef" if it can't figure out what $AUTHORITY
+is. $AUTHORITY should be for all to see, so C<our $AUTHORITY> or plain
+$AUTHORITY are okay, but C<my $AUTHORITY> is not. $AUTHORITY is used by
+introspection, such as L<Class::MOP::Module>.
+
+=cut
+
+sub parse_authority {
+    my($self,$parsefile) = @_;
+    my $result;
+
+    local $/ = "\n";
+    local $_;
+    open(my $fh, '<', $parsefile) or die "Could not open '$parsefile': $!";
+    my $inpod = 0;
+    while (<$fh>) {
+        $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
+        next if $inpod || /^\s*#/;
+        chop;
+        next if /^\s*(if|unless|elsif)/;
+        if ( m{(?<!\\) ([\$*]) (([\w\:\']*) \bAUTHORITY)\b .* =}x ) {
+            my $eval = qq{
+                package ExtUtils::MakeMaker::_authority;
+                no strict;
+
+                local $1$2;
+                \$$2=undef;
+                do {
+                    $_
+                };
+                \$$2;
+            };
+            local $^W = 0;
+            $result = eval($eval);  ## no critic
+            warn "Could not eval '$eval' in $parsefile: $@" if $@;
+        }
+        else {
+          next;
+        }
+        last if defined $result;
+    }
+    close $fh;
+
+    $result = "undef" unless defined $result;
+    return $result;
+}
+
+
 =item pasthru (o)
 
 Defines the string that is passed to recursive make calls in
