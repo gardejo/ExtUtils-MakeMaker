@@ -27,8 +27,8 @@ my %authorities = (q[$AUTHORITY = 'cpan:JOHNDOE']               => 'cpan:JOHNDOE
                    qq[\$Something::AUTHORITY == 'cpan:FOO'\n\$AUTHORITY = 'cpan:JOHNDOE'\n]                             => 'cpan:JOHNDOE',
                    qq[\$Something::AUTHORITY == 'cpan:FOO'\n\$AUTHORITY = 'cpan:JOHNDOE'\n\$AUTHORITY = 'cpan:BAR'\n]   => 'cpan:JOHNDOE',
 
-                   '$AUTHORITY = sprintf("%s", q$Author: cpan:JOHNDOE $ =~ /:\s(.+)\s$/);'                         => 'cpan:JOHNDOE',
-                   q[$AUTHORITY = substr(q$Author: cpan:JOHNDOE $, 8, -1) . 'X';]                                           => 'cpan:JOHNDOEX',
+                   '$AUTHORITY = sprintf("%s", q$Author: cpan:JOHNDOE $ =~ /:\s(.+)\s$/);'                               => 'cpan:JOHNDOE',
+                   q[$AUTHORITY = substr(q$Author: cpan:JOHNDOE $, 8, -1) . 'X';]                                       => 'cpan:JOHNDOEX',
                    q[elsif ( $Something::AUTHORITY ne 'cpan:JOHNDOE' )] => 'undef',
 
                   );
